@@ -1,0 +1,90 @@
+﻿@model LibApp.ViewModels.BookDetailsViewModel
+
+@{
+    ViewBag.Title = Model.Book.Name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@Model.Book.Name</h2>
+@if (this.User.IsInRole("Owner") || this.User.IsInRole("StoreManager"))
+{
+    <p>
+        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Book.Id">Edit book</a>
+    </p>
+}
+
+<ul>
+    <li>Author Name: @Model.Book.AuthorName</li>
+    <li>Genre: @Model.Book.Genre.Name</li>
+    <li>Release Date: @Model.Book.ReleaseDate.ToShortDateString()</li>
+    <li>Date Added: @Model.Book.DateAdded.ToShortDateString()</li>
+    <li>Number in Stock: @Model.Book.NumberInStock</li>
+</ul>
+ <span>People who liked: @Model.Book.Comments.Where(x=>x.IsLike).Count()</span>
+ <br/>
+
+<p>
+        <a class="btn btn-primary" asp-action="AddComment" asp-route-id="@Model.Book.Id">Edit book</a>
+</p>
+
+<i>Remember user can write only one review.</i>
+<br />
+<span>Reviews:</span>
+@if (!Model.Book.Comments.Any(x => x.Customer.Email == User.Identity.Name))
+{
+    <form asp-action="AddComment" asp-route-id="@Model.Book.Id" >
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+             <label asp-for="BlankComment.Content" class="control-label">Your Review</label>
+            <div class="form-group form-check">
+                   
+                 <input class="form-check-input" asp-for="BlankComment.IsLike" />  <label asp-for="BlankComment.IsLike" class="control-label">I liked it</label>
+                
+            </div>
+
+            <div class="form-group">
+               
+                <input asp-for="BlankComment.Content" class="form-control" />
+                <span asp-validation-for="BlankComment.Content" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+    </form>
+}else
+{
+    <a class="btn btn-primary" asp-action="DeleteComment" asp-route-id="@Model.BlankComment.Id" asp-route-bookId="@Model.Book.Id">Delete Comment</a>
+     <form asp-action="EditComment" asp-route-id="@Model.Book.Id" >
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+             <label asp-for="BlankComment.Content" class="control-label">Your Review</label>
+            <div class="form-group form-check">
+                   
+                 <input class="form-check-input" asp-for="BlankComment.IsLike" />  <label asp-for="BlankComment.IsLike" class="control-label">I liked it</label>
+                
+            </div>
+
+            <div class="form-group">
+               
+                <input asp-for="BlankComment.Content" class="form-control" />
+                <span asp-validation-for="BlankComment.Content" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Edit" class="btn btn-primary" />
+            </div>
+    </form>
+}
+@{
+    List<Comment> sorted = Model.Book.Comments.OrderBy(x => x.Added).ToList();
+    foreach (var comment in sorted)
+
+{
+
+<div><h4>@comment.Customer.Name</h4><div>@comment.Content</div> <span>@comment.Added</span></div>
+
+
+}
+
+ 
+
+}
+
+ 
